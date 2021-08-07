@@ -25,7 +25,9 @@ df[["BasePrice", "AgencyCommission"]] = df[[
 # Summary for destinations
 df_group_destination = df.groupby(["Destination"]).sum()[
     ["BasePrice", "AgencyCommission"]]
-fig = px.bar(df_group_destination, x=df_group_destination.index, y="BasePrice")
+
+# df_group_destination1 = df[df['Destination'] == "Montreal"]
+# fig = px.bar()
 
 dash_app.layout = html.Div(
     children=[
@@ -42,14 +44,14 @@ dash_app.layout = html.Div(
             'TravelExperts Booking details table with a bar chart of showing the sales per destination.'
         ]),
         html.Br(),
-        dash_table.DataTable(
-            id='mytable',
-            columns=[{"name": i, "id": i} for i in df.columns],
-            data=df.to_dict('records'),
-            page_action='native',
-            page_size=10
-        ),
-        dcc.Graph(figure=fig)
+        # dash_table.DataTable(
+        #     id='mytable',
+        #     columns=[{"name": i, "id": i} for i in df.columns],
+        #     data=df.to_dict('records'),
+        #     page_action='native',
+        #     page_size=10
+        # ),
+        html.Div(id='page-content2'),
     ]
 )
 
@@ -57,9 +59,38 @@ dash_app.layout = html.Div(
 @dash_app.callback(dash.dependencies.Output('page-content', 'children'),
                    [dash.dependencies.Input('url', 'pathname')])
 def display_page(pathname):
-    return html.Div([
-        html.H3('You are on page {}'.format(pathname))
-    ])
+    # We read the parameters passed by Node.js project from the URL
+    if isinstance(pathname, str):
+        pathname = pathname[1:].split('/')
+        print(pathname, '\n')
+        df_group_destination1 = df[df['Destination']
+                                   == pathname[0]]
+        fig = px.bar(df_group_destination1,
+                     x=df_group_destination1.index, y="BasePrice")
+        # pathname = ''
+        return html.Div([
+            # html.H3('You are on page {}'.format(pathname))
+            dcc.Graph(figure=fig)
+        ])
+
+
+@dash_app.callback(dash.dependencies.Output('page-content2', 'children'),
+                   [dash.dependencies.Input('url', 'pathname')])
+def display_page(pathname):
+    if isinstance(pathname, str):
+        pathname = pathname[1:].split('/')
+
+        return html.Div([
+            dash_table.DataTable(
+                id='mytable',
+                # [{"name": i, "id": i} for i in df.columns],
+                columns=[{"name": "Description", "id": "Description"},
+                         {"name": "BasePrice", "id": "BasePrice"}, ],
+                data=df[["Description", "BasePrice"]].to_dict('records'),
+                page_action='native',
+                page_size=10
+            ),
+        ])
 
 
 if __name__ == '__main__':
