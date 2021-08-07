@@ -86,7 +86,8 @@ def display_page(pathname):
                 # [{"name": i, "id": i} for i in df.columns],
                 columns=[{"name": "Description", "id": "Description"},
                          {"name": "BasePrice", "id": "BasePrice"}, ],
-                data=df[["Description", "BasePrice"]].to_dict('records'),
+                data=df[df["BasePrice"] > int(pathname[1])][[
+                    "Description", "BasePrice"]].to_dict('records'),
                 page_action='native',
                 page_size=10
             ),
